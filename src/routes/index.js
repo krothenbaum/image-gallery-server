@@ -35,6 +35,7 @@ router.get('/gallery', (req,res) => {
 
 router.get('/form', (req, res) => {
   //Endpoint to upload photos
+  res.send('FORM');
 })
 
 router.post('/upload', upload.single('image'), async (req,res) => {
