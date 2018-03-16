@@ -1,17 +1,27 @@
-// make bluebird default Promise
-Promise = require('bluebird'); // eslint-disable-line no-global-assign
-const { port, env } = require('./config/vars');
-const app = require('./config/express');
-const mongoose = require('./config/mongoose');
+require('dotenv').config();
+const bodyParser = require('body-parser');
+const express = require('express'); // Express web server framework
+const mongoose = require('mongoose');
+const morgan = require('morgan');
+// const request = require('request'); // "Request" library
+const cors = require('cors');
+const routes = require('./routes/index.js');
+const app = express();
+const router = express.Router();
 
-// open mongoose connection
-mongoose.connect();
 
-// listen to requests
-app.listen(port, () => console.info(`server started on port ${port} (${env})`));
+app.use(morgan('common'));
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(cors());
+app.use('/', routes);
 
-/**
-* Exports express
-* @public
-*/
+mongoose.Promise = global.Promise;
+mongoose.connect(process.env.MONGO_URI);
+
+app.listen(process.env.PORT, () => {
+  // eslint-disable-next-line no-console
+  console.info(`Server started on ${process.env.PORT}`);
+});
+
 module.exports = app;
