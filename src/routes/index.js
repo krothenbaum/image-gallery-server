@@ -16,7 +16,16 @@ const storage = multer.diskStorage ({
     cb(null, file.fieldname + '-' + Date.now() + '.'  + fileExtension);
   }
 })
-const upload = multer({ storage: storage });
+
+const imageFilter = (req, file, cb) => {
+  // accept image only
+  if (!file.originalname.match(/\.(jpg|jpeg|png|gif)$/)) {
+      return cb(new Error('Only image files are allowed!'), false);
+  }
+  cb(null, true);
+};
+
+const upload = multer({ storage: storage, fileFilter: imageFilter });
 
 router.get('/status', (req, res) => res.send('OK'));
 
