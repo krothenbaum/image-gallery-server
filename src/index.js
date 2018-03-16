@@ -9,7 +9,6 @@ const routes = require('./routes/index.js');
 const app = express();
 const router = express.Router();
 
-
 app.use(morgan('common'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
