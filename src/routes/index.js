@@ -43,8 +43,8 @@ router.post('/upload', upload.single('image'), async (req,res) => {
   // console.log(req.file);
   try {
     const image = new Image({ fileName: req.file.filename});
-    const savedUser = await image.save();
-    res.status(200).json(savedUser);
+    const savedImage = await image.save();
+    res.status(200).json(savedImage);
   } catch (err) {
     console.error(err);
     res.status(500);
