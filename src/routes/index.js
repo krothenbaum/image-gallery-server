@@ -1,11 +1,10 @@
 const express = require('express');
 const multer = require('multer');
-// const mongoose = require('mongoose');
+const mongoose = require('mongoose');
 const Image = require('../models/image.model');
 
 
 const router = express.Router();
-
 
 const storage = multer.diskStorage ({
   destination: (req, file, cb) => {
@@ -29,8 +28,14 @@ const upload = multer({ storage: storage, fileFilter: imageFilter });
 
 router.get('/status', (req, res) => res.send('OK'));
 
-router.get('/gallery', (req,res) => {
-  res.send('GALLERY');
+router.get('/gallery', async (req,res) => {
+  try {
+    let images = await Image.find({}).exec();
+    console.log(images);
+    res.status(200).send(images);
+  } catch(err) {
+    console.error(err);
+  }
 })
 
 router.get('/form', (req, res) => {
