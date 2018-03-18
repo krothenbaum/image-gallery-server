@@ -52,7 +52,7 @@ router.get('/status', (req, res) => res.send('OK'));
 router.get('/gallery', async (req,res) => {
   try {
     let images = await Image.find({}).exec();
-    console.log(images);
+    // console.log(images);
     res.status(200).send(images);
   } catch(err) {
     console.error(err);
