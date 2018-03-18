@@ -1,10 +1,10 @@
 const express = require('express');
 const aws = require('aws-sdk');
 const multer = require('multer');
-const multerS3 = require('multer-s3');
+const multerS3 = require('multer-s3-transform');
 const mongoose = require('mongoose');
 const Image = require('../models/image.model');
-
+const sharp = require('sharp');
 const router = express.Router();
 
 aws.config.update({
@@ -38,11 +38,35 @@ const upload = multer({
     s3: s3,
     bucket: process.env.AWS_BUCKET,
     acl: 'public-read',
-    key: (req, file, cb) => {
+    contentType: multerS3.AUTO_CONTENT_TYPE,
+    shouldTransform: (req, file, cb) => {
       console.log(file);
-      const fileExtension = file.originalname.split('.').pop();
-      cb(null, file.fieldname + '-' + Date.now().toString() + '.'  + fileExtension);
-    }
+      cb(null, /^image/i.test(file.mimetype))
+    },
+    transforms: [{
+      id: 'original',
+      key: (req, file, cb) => {
+        // const fileExtension = file.originalname.split('.').pop();
+        cb(null, 'images/' + Date.now().toString() + '.jpg');
+        // cb(null, 'image-original.jpg')
+      },
+      transform: (req, file, cb) => {
+        cb(null, sharp().jpeg())
+      }
+    }, {
+      id: 'thumbnail',
+      key: (req, file, cb) => {
+        cb(null, 'thumbs/' + Date.now().toString() + '.jpg')
+      },
+      transform: (req, file, cb) => {
+        cb(null, sharp().resize(null, 300).jpeg())
+      }
+    }]
+    // key: (req, file, cb) => {
+    //   console.log(file);
+    //   const fileExtension = file.originalname.split('.').pop();
+    //   cb(null, file.fieldname + '-' + Date.now().toString() + '.'  + fileExtension);
+    // }
   }),
   fileFilter: imageFilter
 });
@@ -66,9 +90,12 @@ router.get('/form', (req, res) => {
 
 router.post('/upload', upload.single('image'), async (req,res) => {
   // res.status(200).send('file uploaded');
-  // console.log(req.file);
+  // console.log(req.file.transforms[0].key);
   try {
-    const image = new Image({ fileName: req.file.key});
+    const image = new Image({
+      fileName: req.file.transforms[1].key,
+      thumbName: req.file.transforms[0].key
+    });
     const savedImage = await image.save();
     res.status(200).json(savedImage);
   } catch (err) {

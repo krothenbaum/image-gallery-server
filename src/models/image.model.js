@@ -7,6 +7,12 @@ const imageSchema = new mongoose.Schema({
     unique: true,
     trim: true
   },
+  thumbName: {
+    type: String,
+    required: true,
+    unique: true,
+    trim: true
+  },
   dateAdded: {
     type: Date,
     default: Date.now
