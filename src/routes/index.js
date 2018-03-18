@@ -2,7 +2,7 @@ const express = require('express');
 const aws = require('aws-sdk');
 const multer = require('multer');
 const multerS3 = require('multer-s3');
-// const mongoose = require('mongoose');
+const mongoose = require('mongoose');
 const Image = require('../models/image.model');
 
 const router = express.Router();
@@ -49,8 +49,14 @@ const upload = multer({
 
 router.get('/status', (req, res) => res.send('OK'));
 
-router.get('/gallery', (req,res) => {
-  res.send('GALLERY');
+router.get('/gallery', async (req,res) => {
+  try {
+    let images = await Image.find({}).exec();
+    console.log(images);
+    res.status(200).send(images);
+  } catch(err) {
+    console.error(err);
+  }
 })
 
 router.get('/form', (req, res) => {
@@ -60,7 +66,7 @@ router.get('/form', (req, res) => {
 
 router.post('/upload', upload.single('image'), async (req,res) => {
   // res.status(200).send('file uploaded');
-  console.log(req.file);
+  // console.log(req.file);
   try {
     const image = new Image({ fileName: req.file.key});
     const savedImage = await image.save();
